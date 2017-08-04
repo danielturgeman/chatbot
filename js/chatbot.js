@@ -92,6 +92,7 @@ ChatBot.sendMessage = function () {
             //Sending the user line to the server using the POST method
             $.post(ChatBot.SERVER_PATH + "/chat", {"msg": chatInput.val()}, function (result) {
                 if (typeof result != "undefined" && "msg" in result) {
+                    console.log('result is ' + result )
                     ChatBot.setAnimation(result.animation);
                     ChatBot.write(result.msg, "boto");
                 } else {
