@@ -14,16 +14,30 @@ communication = {
         "age": ["age", "old", "how old are you?"],
         "gestures": ["how are you?", "how you doing?", "hows it going?", "how's it going?", "how is it going?"],
         "names": ["daniel", "ben", "lauren", "omer", "josh", "rifat", "yan", "tanya", "lorine", "sylvie", "deborah", "lior", "nathaniel", "tomer"],
-        "reactions": ["i am good", "i am bad", "not so well", "not so great","amazing", "could be better","super"]
+        "reactions": ["good", "bad", "great", "sad", "mad", "upset", "happy", "excited",
+                      "i am good", "i am bad", "not so well", "not so great", "amazing",
+                      "could be better", "super", "great", "fantastic"],
+        "locations": ["usa", "us", "united states", "america", "new york", "miami", "las vegas", "boston,"
+                      "france", "tel aviv", "israel", "india", "switzerland", "seattle", "london", "england"],
+        "curses": ["shit", "bitch", "fuck", "asshole", "crap", "bullshit"]
     },
 
     "responses": {
         "greetings": ["Hey there!", "Hey man!", "Hey bro!", "My man!"],
         "weather": ["The weather today is cold", "The weather today is hot", "The weather today is nice"],
         "age": ["I am infinity years old", "My age is none of your business!", "That's a secret!"],
-        "gestures": ["I'm doing great, thanks for asking", "I have no feelings", "Fantastic, thanks!"],
-        "names": ["Hey there, ", "Sup , ", "Nice to meet you, ", "I've been waiting, ", "I know who you are, "]
-        #true format will be ["Hey there {}, how are you?
+        "gestures": ["I'm doing great, thanks for asking, and yourself?", "I have no feelings, how about you?",
+                     "Fantastic, thanks! How about you?"],
+        "names": ["Hey there, {} , whats up? ", "Sup {}, how are you?", "Nice to meet you {}, how's it going?",
+                  "I've been waiting for you {}, how are you?", "I know who you are, {}, how are you feeling?"],
+        "reactions": ["Good to hear about your day, would you like to know about the weather?(Hint: type 'weather')",
+                     "I understand, a joke can always help regardless of your mood, type 'joke'",
+                      "I hear you, perhaps you can try some activities like "
+                      "sports, reading, shopping, or programming in your local area",
+                      "Good to hear about your status, where are you from?"],
+        "locations": ["Cool, I have a cousin that lives there", "No way! What an awesome place",
+                      "Wow! I hope to travel there one day!" , "You are a very lucky person, that's an amazing place"],
+        "curses": ["Sorry but cursing of any form is not tolerated, please try again"]
     },
 
     "animations":  {
@@ -31,7 +45,10 @@ communication = {
         "weather": ["ok", "excited", "crying"],
         "age": [],
         "gestures": ["afraid", "bored", "confused", "excited", "inlove", "heartbroke"],
-        "names": ["excited", "dancing", "takeoff"]
+        "names": ["excited", "dancing", "takeoff"],
+        "reactions": ["excited", "money", "dancing", "dog", "giggling", "waiting"],
+        "locations": ["takeoff", "excited", "money", "dancing"],
+        "curses": ["afraid", "no", "crying"]
     }
 }
 def check_if_combined(user_message):
@@ -60,6 +77,21 @@ def check_if_combined(user_message):
     else:
         return None
 
+def check_if_curse(user_message):
+    user_message_curses = communication["message"]["curses"]
+    robot_response_curses = communication["responses"]["curses"]
+    robot_response_animation = communication["animations"]["curses"]
+
+    user_message_list = user_message.split()
+    for word in user_message_list:
+        if word in user_message_curses:
+            robot_response = robot_response_curses[randint(0, (len(robot_response_curses) - 1))]
+            robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+            return {"animation": robot_animation, "msg": robot_response}
+
+    else:
+        return None
+
     ##To make even more dynamic, pass in a topic and that "greetings to topic"
 def check_if_greeting(user_message):
     ##Exact string match pattern
@@ -73,7 +105,6 @@ def check_if_greeting(user_message):
         return {"animation": robot_animation, "msg": robot_response}
 
     ##keyword finder, rather than direct string match
-    ##adding names to condition
     user_message_list = user_message.split()
     for word in user_message_list:
         if word in user_message_greetings:
@@ -101,6 +132,25 @@ def check_if_gesture(user_message):
     else:
         return None
 
+def check_if_reaction(user_message):
+    user_message_reactions = communication["message"]["reactions"]
+    robot_response_reactions = communication["responses"]["reactions"]
+    robot_response_animation = communication["animations"]["reactions"]
+    if user_message in user_message_reactions:
+        robot_response = robot_response_reactions[randint(0, (len(robot_response_reactions) - 1))]
+        robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+        return {"animation": robot_animation, "msg": robot_response}
+
+    user_message_list = user_message.split()
+    for word in user_message_list:
+        if word in user_message_reactions:
+            robot_response = robot_response_reactions[randint(0, (len(robot_response_reactions) - 1))]
+            robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+            return {"animation": robot_animation, "msg": robot_response}
+
+    else:
+        return None
+
 def check_if_name(user_message):
     print('checking for name')
     user_message_names = communication["message"]["names"]
@@ -110,15 +160,30 @@ def check_if_name(user_message):
         print("name is in user message names list")
         robot_response = robot_response_names[randint(0, (len(robot_response_names) - 1))]
         robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
-        return {"animation": robot_animation, "msg": robot_response + user_message +" how are you?"}
+        return {"animation": robot_animation, "msg": robot_response.format(user_message)}
 
     user_message_list = user_message.split()
     for word in user_message_list:
         if word in user_message_names:
             robot_response = robot_response_names[randint(0, (len(robot_response_names) - 1))]
             robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
-            return {"animation": robot_animation, "msg": robot_response}
+            return {"animation": robot_animation, "msg": robot_response.format(word)}
 
+def check_if_location(user_message):
+    user_message_locations = communication["message"]["locations"]
+    robot_response_locations = communication["responses"]["locations"]
+    robot_response_animation = communication["animations"]["locations"]
+    if user_message in user_message_locations:
+        robot_response = robot_response_locations[randint(0, (len(robot_response_locations) - 1))]
+        robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+        return {"animation": robot_animation, "msg": robot_response}
+
+    user_message_list = user_message.split()
+    for word in user_message_list:
+        if word in user_message_locations:
+            robot_response = robot_response_locations[randint(0, (len(robot_response_locations) - 1))]
+            robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+            return {"animation": robot_animation, "msg": robot_response.format(word)}
 @route('/', method='GET')
 def index():
     return template("chatbot.html")
@@ -130,6 +195,12 @@ def chat():
     robot_response = "I'm sorry, I don't understand!"
     user_message = request.POST.get('msg')
     user_message = user_message.lower()
+
+    new_object = check_if_curse(user_message)
+    if new_object is not None:
+        robot_response = new_object["msg"]
+        robot_animation = new_object["animation"]
+        return json.dumps({"animation": robot_animation, "msg": robot_response})
 
     new_object = check_if_combined(user_message)
     if new_object is not None:
@@ -156,7 +227,20 @@ def chat():
         robot_animation = new_object["animation"]
         return json.dumps({"animation": robot_animation, "msg": robot_response})
 
+    new_object = check_if_reaction(user_message)
+    if new_object is not None:
+        robot_response = new_object["msg"]
+        robot_animation = new_object["animation"]
+        return json.dumps({"animation": robot_animation, "msg": robot_response})
+
+    new_object = check_if_location(user_message)
+    if new_object is not None:
+        robot_response = new_object["msg"]
+        robot_animation = new_object["animation"]
+        return json.dumps({"animation": robot_animation, "msg": robot_response})
+
     return json.dumps({"animation": "confused", "msg": robot_response})
+
 
 
 @route("/test", method='POST')
