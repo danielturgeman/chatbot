@@ -10,7 +10,7 @@ import json
 communication = {
     "message": {
         "greetings": ["hello", "hi", "hey", "hiya", "hey bro", "hey dude", "hey bro", "sup"],
-        "weather": ["weather", "cold", "hot"],
+        "weather": ["weather", "cold", "hot", "warm", "chilly", "freezing"],
         "age": ["age", "old", "how old are you?"],
         "gestures": ["how are you?", "how you doing?", "hows it going?", "how's it going?", "how is it going?"],
         "names": ["daniel", "ben", "lauren", "omer", "josh", "rifat", "yan", "tanya", "lorine", "sylvie", "deborah", "lior", "nathaniel", "tomer"],
@@ -37,7 +37,18 @@ communication = {
                       "Good to hear about your status, where are you from?"],
         "locations": ["Cool, I have a cousin that lives there", "No way! What an awesome place",
                       "Wow! I hope to travel there one day!" , "You are a very lucky person, that's an amazing place"],
-        "curses": ["Sorry but cursing of any form is not tolerated, please try again"]
+        "curses": ["Sorry but cursing of any form is not tolerated, please try again"],
+        "jokes": ["Q: Why couldn't the blonde add 10 and seven on a calculator?/n A: She couldn't find the 10 key.",
+                  "How is a computer like an air conditioner? When you open Windows it won't work!",
+                  "Guy 1: Hey! Why do you smoke cigarettes even"
+                  "though there is a warning on the pack that says it's bad for your health?" 
+                  "Guy 2: I am a software professional.  I don't bother about warnings -- I am concerned only about the Alerts. ",
+                  "Q: What's the difference between a woman and a computer?"
+                  "A: Woman doesn't accept 3 1/2 inch floppies."],
+        "weather": ["It's a really nice day out! Go have fun!", "The weather today is pretty warm",
+                    "It's really cold today, stay inside and talk with me", "It is extremely hot outside, you should hit the beach",
+                    "It's like a desert out there, don't forget to drink water!"]
+
     },
 
     "animations":  {
@@ -48,7 +59,9 @@ communication = {
         "names": ["excited", "dancing", "takeoff"],
         "reactions": ["excited", "money", "dancing", "dog", "giggling", "waiting"],
         "locations": ["takeoff", "excited", "money", "dancing"],
-        "curses": ["afraid", "no", "crying"]
+        "curses": ["afraid", "no", "crying"],
+        "jokes": ["laughing", "giggling", "excited", "dancing"],
+        "weather": ["dancing", "excited",]
     }
 }
 def check_if_combined(user_message):
@@ -88,6 +101,17 @@ def check_if_curse(user_message):
             robot_response = robot_response_curses[randint(0, (len(robot_response_curses) - 1))]
             robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
             return {"animation": robot_animation, "msg": robot_response}
+
+    else:
+        return None
+
+def check_if_joke(user_message):
+    if "joke" in user_message:
+        robot_response_jokes = communication["responses"]["jokes"]
+        robot_response_animation = communication["animations"]["jokes"]
+        robot_response = robot_response_jokes[randint(0, (len(robot_response_jokes) - 1))]
+        robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+        return {"animation": robot_animation, "msg": robot_response}
 
     else:
         return None
@@ -184,6 +208,23 @@ def check_if_location(user_message):
             robot_response = robot_response_locations[randint(0, (len(robot_response_locations) - 1))]
             robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
             return {"animation": robot_animation, "msg": robot_response.format(word)}
+
+def check_if_weather(user_message):
+    user_message_weather = communication["message"]["weather"]
+    robot_response_weather = communication["responses"]["weather"]
+    robot_response_animation = communication["animations"]["reactions"]
+    if user_message in user_message_weather:
+        robot_response = robot_response_weather[randint(0, (len(robot_response_weather) - 1))]
+        robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+        return {"animation": robot_animation, "msg": robot_response}
+
+    user_message_list = user_message.split()
+    for word in user_message_list:
+        if word in user_message_weather:
+            robot_response = robot_response_weather[randint(0, (len(robot_response_weather) - 1))]
+            robot_animation = robot_response_animation[randint(0, (len(robot_response_animation) - 1))]
+            return {"animation": robot_animation, "msg": robot_response}
+
 @route('/', method='GET')
 def index():
     return template("chatbot.html")
@@ -192,7 +233,7 @@ def index():
 @route("/chat", method='POST')
 def chat():
     new_object = {}
-    robot_response = "I'm sorry, I don't understand!"
+    robot_response = "I'm sorry, I don't understand!, Try asking about me, the weather, or a joke"
     user_message = request.POST.get('msg')
     user_message = user_message.lower()
 
@@ -234,6 +275,18 @@ def chat():
         return json.dumps({"animation": robot_animation, "msg": robot_response})
 
     new_object = check_if_location(user_message)
+    if new_object is not None:
+        robot_response = new_object["msg"]
+        robot_animation = new_object["animation"]
+        return json.dumps({"animation": robot_animation, "msg": robot_response})
+
+    new_object = check_if_joke(user_message)
+    if new_object is not None:
+        robot_response = new_object["msg"]
+        robot_animation = new_object["animation"]
+        return json.dumps({"animation": robot_animation, "msg": robot_response})
+
+    new_object = check_if_weather(user_message)
     if new_object is not None:
         robot_response = new_object["msg"]
         robot_animation = new_object["animation"]
